@@ -23,7 +23,8 @@
                               prepend-icon="lock"
                               name="password"
                               placeholder="Contraseña"
-                               id="passwordLogin"
+                              id="passwordLogin"
+                              type="password"
                            ></v-text-field>
                         </v-form>
                      </v-card-text>
@@ -87,12 +88,37 @@
             </v-card>
             </v-dialog>
         
+
+        
+
+   <v-dialog
+      v-model="showDialogMessage"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          {{this.dialogMessageTitle}}
+        </v-card-title>
+        <v-card-text>{{this.dialogMessage}}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="hideDialogMessage()"
+          >
+            Aceptar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
    </v-app>
 </template>
 
 <script>
-import {axios} from "axios";
-
 export default {
     name: 'Login',
     data: () => ({
@@ -103,6 +129,10 @@ export default {
         showLogin: true,
         showRegistro: false,
         isLoading:false,
+        showDialogMessage:false,
+        dialogMessageTitle:'',
+        dialogMessage:'',
+
         rules:{
             mail: [
             val => (val || '').length > 0 && (/@gmail.com\s*$/.test(val)) || 'Solo Correos Gmail',
@@ -138,10 +168,58 @@ export default {
             this.passwordRegister = '';
         },
         async makeRegister(){
-            this.isLoading = true;
-            console.log(this.emailRegister);
-            setTimeout(() => (this.isLoading = false), 4000)
-        }
+           if(this.validatePassword()){
+               this.isLoading = true;
+               let databody = {
+                     email: this.emailRegister,
+                     password: this.passwordRegister
+               };
+
+               await this.axios.post('http://127.0.0.1:30027/users/register', databody)
+               .then((result) => {
+               console.log(result);  
+               this.isLoading = false
+               }).catch((err) => {
+                  this.isLoading = false
+                  this.dialogMessageTitle = 'Error al Registrarse';
+                  this.dialogMessage = err.response.data.message;
+                  this.showDialogMessage = true;
+               });
+           } else {
+              this.dialogMessageTitle = 'Contraseña Invalida';
+               this.dialogMessage = 'La contraseña debe contar con al menos 8 caracteres, un caracter especial, un número y una mayúscula.';
+               this.showDialogMessage = true;
+           }
+             
+        },
+        async login(){
+           this.isLoading = true;
+               let databody = {
+                     email: this.emailLogin,
+                     password: this.passwordLogin
+               };
+
+               await this.axios.post('http://127.0.0.1:30027/users/login', databody)
+               .then((result) => {
+               console.log(result);  
+               this.isLoading = false
+               this.$router.push("/");
+               }).catch((err) => {
+                  this.isLoading = false
+                  this.dialogMessageTitle = 'Error al Iniciar Sesión';
+                  this.dialogMessage = err.response.data.message;
+                  this.showDialogMessage = true;
+               });
+        },
+        validatePassword(){
+           let re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+            return re.test(this.passwordRegister) 
+        },
+        hideDialogMessage(){
+            this.dialogMessageTitle = '';
+            this.dialogMessage = '';
+            this.showDialogMessage = false;
+        },
     },
 }
 </script>
