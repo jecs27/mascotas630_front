@@ -19,24 +19,15 @@
 
 
   <v-layout row wrap>
-    <v-main v-for="pet in petList" :key="pet.pet_id" >
+    <v-main v-for="(pet, index) in petList" :key="index">
       <v-flex >
-      <v-card  max-width="344">
+      <v-card width="350" max-width="600">
         <v-card-title>{{pet.name}} </v-card-title>
         <v-card-subtitle> {{pet.breed}} </v-card-subtitle>
         <v-card-actions>
-          
           <v-spacer></v-spacer>
-          
-          <v-btn color="green lighten-2" text  @click="editPet(pet.pet_id)">Editar</v-btn>
-        </v-card-actions>
-
-        <v-expand-transition>
-          <div v-for="img in petList.images" :key="img.petImage_id">
-            <v-divider></v-divider>
-            
-          </div>
-        </v-expand-transition>
+          <v-btn color="green lighten-2" text  @click="editPet(index)">Editar</v-btn>
+        </v-card-actions>            
       </v-card>
     </v-flex>
     </v-main>
@@ -50,7 +41,7 @@
     <v-dialog
       v-model="dialog"
       persistent
-      max-width="600px"
+      max-width="700"
     >
       <v-card>
         <v-card-title>
@@ -78,7 +69,16 @@
                   required
                 ></v-text-field>
               </v-col>
-
+            </v-row>
+            <v-row>
+              <v-col v-for="img in pet_data" :key="img.petImage_id">
+               <v-img
+                  :src="`data:image/jpeg;base64,${img.image}`"
+                  height="200px"
+                  width="200px"
+                ></v-img>
+                
+            </v-col>
             </v-row>
           </v-container>
           <small style="color:red">*Campos Requeridos</small>
@@ -112,7 +112,8 @@
     <v-dialog
       v-model="registerDialog"
       persistent
-      max-width="800px"
+       width="700" 
+      max-width="900"
     >
       <v-card>
         <v-card-title>
@@ -130,47 +131,61 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-          </v-container>
-          <small style="color:red">*Campos Requeridos</small>
-        </v-card-text>
-      <v-row>
-        <v-col cols="12" sm="6">
-        <v-menu
-          ref="menu"
-          :close-on-content-click="false"
-          :return-value.sync="petBirthday"
-          transition="scale-transition"
-          offset-y
-          min-width="auto"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              v-model="petBirthday"
-              label="Picker in menu"
-              prepend-icon="mdi-calendar"
-              readonly
-              v-bind="attrs"
-              v-on="on"
-            ></v-text-field>
-          </template>
-          <v-date-picker
-            v-model="petBirthday"
-            no-title
-            scrollable
-            :max="maxDate"
-          >
-            <v-spacer></v-spacer>
-            <v-btn
-              text
-              color="primary"
-              @click="$refs.menu.save(petBirthday)"
+
+            <v-row>
+            <v-col cols="12" sm="6">
+            <v-menu
+              ref="menu"
+              :close-on-content-click="false"
+              :return-value.sync="petBirthday"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
             >
-              OK
-            </v-btn>
-          </v-date-picker>
-        </v-menu>
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="petBirthday"
+                  label="Fecha Nacimiento"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="petBirthday"
+                no-title
+                scrollable
+                :max="maxDate"
+              >
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="$refs.menu.save(petBirthday)"
+                >
+                  OK
+                </v-btn>
+              </v-date-picker>
+            </v-menu>
+          </v-col>
+
+
+          
+          <v-col cols="12" sm="6">
+            <v-file-input
+              v-model="images"
+              multiple
+              label="Imágenes"
+              clearable
+            ></v-file-input>
           </v-col>
         </v-row>
+
+          </v-container>
+         
+        </v-card-text>
+      
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="registerDialog = false" >
@@ -206,14 +221,19 @@
       pet_id_dialog:0,
       maxDate: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       petBirthday:'',
+      images:[],
+      pet_data:[],
     }),
     components:{
       
     },
     methods:{
       editPet(pet_id){
-        this.petName = this.petList[pet_id-2].name;
-        this.petBreed = this.petList[pet_id-2].breed;
+
+        this.petName = this.petList[pet_id].name;
+        this.petBreed = this.petList[pet_id].breed;
+        this.pet_data = this.petList[pet_id].images;
+ 
         this.dialog = true
       },
       logOut(){
@@ -243,6 +263,7 @@
         this.registerDialog = true;
       },
       async makeRegisterPet(){
+
         if(this.petName != '' && 
           this.petBreed != '' &&
           this.petBirthday != ''
@@ -253,8 +274,12 @@
           form.append('name',  this.petName );
           form.append('breed', this.petBreed);
           form.append('birthday', this.petBirthday);
-          //Falta agregar imagenes
 
+          if(this.images.length > 0) {
+            for(let imgP of this.images){
+              form.append('image', imgP);
+            }
+          }
           await this.axios({
               method: 'post',
               url: 'http://mascotaseistreinta.ml/pets/registerPet',
