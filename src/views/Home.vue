@@ -9,7 +9,7 @@
       </div>
 
       <v-spacer></v-spacer>
-      <v-btn target="_blank" text>
+      <v-btn target="_blank" text @click="logOut()">
         <span class="mr-2">Cerrar Sesión</span>
         <v-icon>logout</v-icon>
       </v-btn>
@@ -110,7 +110,8 @@
   export default {
     data: () => ({
       show: false,
-      dialog: false
+      dialog: false,
+      nLimitData:12,
     }),
     components:{
       
@@ -119,7 +120,42 @@
       mostrarModal(){
         console.log("entra");
         this.dialog = true
+      },
+      logOut(){
+        this.$cookies.remove("token_pet");
+        this.$cookies.remove("cookies_user_id");
+        this.$router.push("/login");
+      },
+      async getPetList(){
+        
+        let databody = {
+            lastId: 0,
+            limitData: this.nLimitData,
+            user_id: this.$cookies.get("cookies_user_id")
+        };
+
+        console.log(databody);
+        await this.axios.post('http://127.0.0.1:30027/pets/listMyPets', databody,{
+          headers: {
+            Authorization: 'Bearer ' + this.$cookies.get("token_pet")
+          }
+        })
+        .then((result) => {
+          console.log(result);
+        }).catch((err) => {
+          console.log(err.response);
+        });
       }
-    }
+    },
+    created() {
+     this.getPetList();
+    },
+    beforeCreate() {
+      let cookie_token_pet = this.$cookies.get("token_pet");
+      if(cookie_token_pet == null){
+        this.$router.push("/login");
+      }
+     
+    },
   }
 </script>

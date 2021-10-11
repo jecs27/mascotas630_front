@@ -8,8 +8,11 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 import axios from 'axios';
 import VueAxios from 'vue-axios';
+import VueCookies from 'vue-cookies'
+
 Vue.use(VueAxios, axios);
 Vue.config.productionTip = false
+Vue.use(VueCookies);
 
 new Vue({
     router,

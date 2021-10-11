@@ -31,7 +31,7 @@
                      <v-card-actions>
                           <v-btn color="purple lighten-1" text  @click="showRegisterForm()">Registrarse</v-btn>
                         <v-spacer></v-spacer>
-                        <v-btn color="primary" :disabled="!canLogin" to="/">Ingresar</v-btn>
+                        <v-btn color="primary" :disabled="!canLogin" @click="login()">Ingresar</v-btn>
                      </v-card-actions>
                   </v-card>
                </v-flex>
@@ -198,16 +198,24 @@ export default {
                      email: this.emailLogin,
                      password: this.passwordLogin
                };
-
-               await this.axios.post('http://127.0.0.1:30027/users/login', databody)
+               await this.axios.post('http://127.0.0.1:30027/users/loginUser', databody)
                .then((result) => {
-               console.log(result);  
-               this.isLoading = false
-               this.$router.push("/");
+                  let token_pet = result.data.token;
+                  let cookies_user_id = result.data.data.user_id
+                  this.$cookies.set( "token_pet",token_pet);
+                  this.$cookies.set( "cookies_user_id",cookies_user_id);
+
+                  this.isLoading = false
+                  this.$router.push("/");
                }).catch((err) => {
                   this.isLoading = false
                   this.dialogMessageTitle = 'Error al Iniciar Sesión';
-                  this.dialogMessage = err.response.data.message;
+                  let messageBody = '';
+                  try{
+                     messageBody = err.response.data.message;
+                  }catch(error){
+                     this.dialogMessage = err;
+                  }                  
                   this.showDialogMessage = true;
                });
         },
@@ -220,6 +228,12 @@ export default {
             this.dialogMessage = '';
             this.showDialogMessage = false;
         },
+    },
+      beforeCreate() {
+      let token_pet = this.$cookies.get("token_pet");
+      if(token_pet != null){
+        this.$router.push("/");
+      }
     },
 }
 </script>
