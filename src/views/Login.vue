@@ -175,7 +175,7 @@ export default {
                      password: this.passwordRegister
                };
 
-               await this.axios.post('http://127.0.0.1:30027/users/register', databody)
+               await this.axios.post('http://mascotaseistreinta.ml/users/register', databody)
                .then((result) => {
                console.log(result);  
                this.isLoading = false
@@ -198,7 +198,7 @@ export default {
                      email: this.emailLogin,
                      password: this.passwordLogin
                };
-               await this.axios.post('http://127.0.0.1:30027/users/loginUser', databody)
+               await this.axios.post('http://mascotaseistreinta.ml/users/loginUser', databody)
                .then((result) => {
                   let token_pet = result.data.token;
                   let cookies_user_id = result.data.data.user_id

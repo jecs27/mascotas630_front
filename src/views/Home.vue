@@ -127,7 +127,7 @@
         this.$router.push("/login");
       },
       async getPetList(){
-        
+
         let databody = {
             lastId: 0,
             limitData: this.nLimitData,
@@ -135,7 +135,7 @@
         };
 
         console.log(databody);
-        await this.axios.post('http://127.0.0.1:30027/pets/listMyPets', databody,{
+        await this.axios.post('http://mascotaseistreinta.ml/pets/listMyPets', databody,{
           headers: {
             Authorization: 'Bearer ' + this.$cookies.get("token_pet")
           }
