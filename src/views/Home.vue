@@ -25,6 +25,7 @@
         <v-card-title>{{pet.name}} </v-card-title>
         <v-card-subtitle> {{pet.breed}} </v-card-subtitle>
         <v-card-actions>
+          <v-btn color="red lighten-1" text  @click="deletePet(index)">Borrar</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="green lighten-2" text  @click="editPet(index)">Editar</v-btn>
         </v-card-actions>            
@@ -296,7 +297,18 @@
             console.log(err);
           });
         }
-        
+      },
+      async deletePet(pet_id){
+         await this.axios.delete('http://mascotaseistreinta.ml/pets/deletePet/'+this.petList[pet_id].uuid,{
+         headers: {
+            Authorization: 'Bearer ' + this.$cookies.get("token_pet")
+          }
+        },
+         )
+          .then((result) => {
+              this.getPetList();
+          }).catch((err) => {
+          });
       }
     },
     created() {
