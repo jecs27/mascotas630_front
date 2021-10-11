@@ -163,7 +163,7 @@ export default {
             this.passwordLogin = '';
         },
         showLoginForm() {
-             this.showLogin = true;
+            this.showLogin = true;
             this.emailRegister = '';
             this.passwordRegister = '';
         },
@@ -177,8 +177,16 @@ export default {
 
                await this.axios.post('http://mascotaseistreinta.ml/users/register', databody)
                .then((result) => {
-               console.log(result);  
-               this.isLoading = false
+                  console.log(result);  
+                  this.isLoading = false
+                  this.dialogMessageTitle = 'Registro';
+                  this.dialogMessage = 'Usuario registrado ';
+                  this.showDialogMessage = true;
+                  
+                  this.emailLogin=this.emailRegister;
+                   this.passwordLogin = this.passwordRegister;
+                   this.showLoginForm();
+                   
                }).catch((err) => {
                   this.isLoading = false
                   this.dialogMessageTitle = 'Error al Registrarse';
